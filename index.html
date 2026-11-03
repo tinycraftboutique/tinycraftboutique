@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TinyCraft Boutique</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{--cream:#faf7f2;--paper:#fffdf9;--ink:#29251f;--muted:#777066;--gold:#b58a52;--line:#e9e1d6;--serif:Georgia,"Times New Roman",serif;--sans:Arial,Helvetica,sans-serif}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);background:var(--cream);font-family:var(--sans);line-height:1.6}a{color:inherit;text-decoration:none}
+    .announcement{padding:9px 16px;text-align:center;background:var(--ink);color:white;font-size:12px;letter-spacing:.12em}
+    header{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:20px 7%;background:var(--paper);border-bottom:1px solid var(--line)}
+    .logo{font-family:var(--serif);font-size:27px;letter-spacing:.04em}nav{display:flex;gap:20px;align-items:center;flex-wrap:wrap;font-size:13px}nav a:hover{color:var(--gold)}
+    button,.button{cursor:pointer;border:1px solid var(--ink);background:var(--ink);color:white;padding:12px 18px;font-size:12px;letter-spacing:.08em;text-transform:uppercase}.button:hover,button:hover{background:transparent;color:var(--ink)}button.secondary{background:transparent;color:var(--ink)}button.heart{position:absolute;right:12px;top:12px;border:0;border-radius:50%;width:42px;height:42px;padding:0;background:rgba(255,253,249,.95);color:#9a554e;font-size:23px;line-height:1;text-transform:none;letter-spacing:0}
+    .hero{min-height:520px;display:grid;grid-template-columns:1.05fr .95fr;background:#eee6da}.hero-copy{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:70px 12%}.eyebrow{color:var(--gold);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:bold}h1,h2,h3{font-family:var(--serif);font-weight:normal;line-height:1.12}h1{max-width:540px;margin:18px 0;font-size:clamp(42px,5vw,68px)}.hero-copy p{max-width:420px;color:#625b51}.hero-image{min-height:400px;background:url("images/hero.jpg") center/cover no-repeat}
+    section{padding:75px 7%}.section-heading{text-align:center;margin:0 auto 38px}.section-heading h2{margin:10px 0;font-size:clamp(32px,4vw,45px)}.section-heading p{color:var(--muted);margin:0}.products{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:25px}.product-card{position:relative;min-width:0;cursor:pointer}.product-image{width:100%;aspect-ratio:4/5;object-fit:cover;display:block;background:#eee8df}.product-info{padding:13px 2px}.product-info h3{margin:0 0 4px;font-size:21px}.product-info p{margin:0;color:var(--muted);font-size:14px}.price{display:block;margin-top:8px;font-size:14px}.old-price{text-decoration:line-through;color:var(--muted);margin-right:8px}.sale-tag{display:inline-block;color:#8a3d32;font-size:11px;text-transform:uppercase;letter-spacing:.1em;margin-top:5px}
+    .about{display:grid;grid-template-columns:1fr 1fr;gap:8%;align-items:center;background:var(--paper)}.about-image{width:100%;aspect-ratio:5/4;object-fit:cover;background:#eee8df}.about h2{font-size:clamp(34px,4vw,48px);margin:12px 0}.about p,.contact p{color:var(--muted)}.contact{text-align:center;background:#eee6da}.contact h2{font-size:42px;margin:12px 0}footer{padding:28px 7%;display:flex;justify-content:space-between;gap:20px;background:var(--ink);color:white;font-size:12px}
+    .account-area{background:var(--paper);border:1px solid var(--line);padding:24px;margin:28px auto;max-width:760px}.account-area h2{margin-top:0}.auth-form{display:grid;grid-template-columns:1fr 1fr;gap:12px}.auth-form input{width:100%;padding:12px;border:1px solid var(--line);background:white;font:inherit}.auth-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.status{font-size:13px;color:var(--muted);min-height:22px}.wishlist-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.empty{color:var(--muted);font-size:14px}
+    .modal{display:none;position:fixed;z-index:1000;inset:0;background:rgba(0,0,0,.65);justify-content:center;align-items:center;padding:18px}.modal.active{display:flex}.modal-content{position:relative;display:grid;grid-template-columns:1fr 1fr;background:var(--paper);width:100%;max-width:850px;max-height:90vh;overflow:auto}.modal-content img{width:100%;height:100%;min-height:380px;object-fit:cover}.modal-info{padding:42px 34px;display:flex;flex-direction:column;justify-content:center}.modal-info h2{font-size:36px;margin:14px 0 4px}.modal-info p{color:var(--muted)}.close-modal{position:absolute;right:10px;top:8px;background:transparent;color:var(--ink);border:0;font-size:30px;padding:3px 10px;z-index:2}.modal-buttons{display:flex;gap:10px;flex-wrap:wrap}.modal-buttons button{margin-top:12px}
+    @media(max-width:760px){header{flex-direction:column;padding:18px 5%}.hero{grid-template-columns:1fr}.hero-copy{padding:55px 8%}.hero-image{min-height:300px}section{padding:60px 6%}.products,.wishlist-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}.about{grid-template-columns:1fr;gap:28px}footer{flex-direction:column;text-align:center}}
+    @media(max-width:520px){.products,.wishlist-grid{grid-template-columns:1fr}.product-image{aspect-ratio:1/1}.auth-form{grid-template-columns:1fr}.modal-content{grid-template-columns:1fr;max-width:440px}.modal-content img{min-height:220px;max-height:280px}.modal-info{padding:24px}}
+  </style>
+</head>
+<body>
+  <div class="announcement">HANDMADE WITH CARE · TINYCRAFT BOUTIQUE</div>
+  <header>
+    <a class="logo" href="#top">TinyCraft Boutique</a>
+    <nav>
+      <a href="#shop">Shop</a><a href="#wishlist">Wishlist <span id="wishlist-count">(0)</span></a><a href="#about">Our Story</a><a href="#contact">Contact</a>
+      <button class="secondary" id="account-toggle" type="button">Account / Login</button>
+    </nav>
+  </header>
+  <main id="top">
+    <section class="hero">
+      <div class="hero-copy"><span class="eyebrow">Little things, lasting memories</span><h1>Jewellery that feels like you.</h1><p>Thoughtfully chosen details, made to add a little something special to every day.</p><a class="button" href="#shop">Explore the collection</a></div>
+      <div class="hero-image" role="img" aria-label="Jewellery collection photograph"></div>
+    </section>
+    <section id="shop">
+      <div class="section-heading"><span class="eyebrow">The collection</span><h2>Made to be treasured</h2><p>Tap a product to see its details. Use the heart to save it to your wishlist.</p></div>
+      <div class="products" id="product-list"></div>
+    </section>
+    <section id="wishlist">
+      <div class="section-heading"><span class="eyebrow">Your favourites</span><h2>Your wishlist</h2><p>Your saved pieces are linked to your account, so they follow you between devices.</p></div>
+      <div id="wishlist-content"><p class="empty">Log in to see and save your wishlist.</p></div>
+    </section>
+    <section class="about" id="about"><img class="about-image" src="images/about.jpg" alt="Jewellery-making process" onerror="this.style.visibility='hidden'"><div><span class="eyebrow">A little about us</span><h2>Small details. Lots of heart.</h2><p>Every piece is selected and prepared with care. This little business is built around creativity, personal touches, and jewellery that makes people feel special.</p><p>Thank you for supporting a small business. It genuinely means a lot.</p></div></section>
+    <section class="contact" id="contact"><span class="eyebrow">Let's keep in touch</span><h2>Found your favourite?</h2><p>Message us on Instagram to ask a question or place an order.</p><a class="button" id="instagram-link" href="https://instagram.com/" target="_blank" rel="noopener">Message on Instagram</a></section>
+  </main>
+  <footer><span>© <span id="year"></span> TinyCraft Boutique</span><span>Made with care · Follow us on Instagram</span></footer>
+
+  <!-- ACCOUNT WINDOW: Customers can create an account or log in here. -->
+  <div class="modal" id="account-modal" role="dialog" aria-modal="true" aria-labelledby="account-title">
+    <div class="account-area">
+      <button class="close-modal" id="close-account" aria-label="Close">×</button>
+      <h2 id="account-title">Your account</h2>
+      <p id="account-intro">Create an account or log in to keep your wishlist.</p>
+      <form id="auth-form" class="auth-form">
+        <input id="email" type="email" placeholder="Email address" autocomplete="email" required>
+        <input id="password" type="password" placeholder="Password (at least 6 characters)" autocomplete="current-password" minlength="6" required>
+      </form>
+      <div class="auth-actions"><button id="signup-button" type="button">Create account</button><button id="login-button" type="button" class="secondary">Log in</button><button id="logout-button" type="button" class="secondary" hidden>Log out</button></div>
+      <p class="status" id="auth-status" aria-live="polite"></p>
+      <p class="status">New accounts may need to confirm their email before logging in. Check the inbox and spam folder.</p>
+    </div>
+  </div>
+
+  <!-- PRODUCT INFORMATION WINDOW -->
+  <div class="modal" id="product-modal" role="dialog" aria-modal="true" aria-labelledby="modal-name">
+    <div class="modal-content"><button class="close-modal" id="close-product" aria-label="Close">×</button><img id="modal-image" src="" alt=""><div class="modal-info"><span class="eyebrow">TINYCRAFT BOUTIQUE</span><h2 id="modal-name"></h2><div id="modal-price"></div><p id="modal-description"></p><p id="modal-details"></p><div class="modal-buttons"><button id="modal-wishlist">♡ Save to wishlist</button><a class="button" id="modal-order" href="https://instagram.com/" target="_blank" rel="noopener">Ask about this item</a></div></div></div>
+  </div>
+
+  <script type="module">
+    /* =============================================================
+       BEGINNER EDITING AREA
+       Change product names, descriptions, prices and image filenames here.
+       Product IDs must stay unique and should not be changed after launch.
+       ============================================================= */
+    const BUSINESS_NAME = "TinyCraft Boutique";
+    const INSTAGRAM_URL = "https://www.instagram.com/tinycraft.botique._?vrfl=bjF0dzJveHZ6YmVl"; // Paste the shop's Instagram profile URL.
+    const PRODUCTS = [
+      { id: "golden-glow-necklace", name: "Golden Glow Necklace", description: "A simple everyday favourite.", details: "A delicate piece for everyday wear.", price: 45, salePrice: null, available: true, image: "images/necklace.jpg", alt: "Gold necklace" },
+      { id: "pearl-drop-earrings", name: "Pearl Drop Earrings", description: "A delicate touch of elegance.", details: "A lovely gift or an elegant everyday accessory.", price: 35, salePrice: null, available: true, image: "images/earrings.jpg", alt: "Pearl drop earrings" }
+      // To add a product, copy one object and give it a NEW unique id.
+      // price and salePrice are numbers in RON. Use null for no sale price.
+    ];
+
+    /* =============================================================
+       SUPABASE SETTINGS
+       1. Create a project at https://supabase.com
+       2. In Project Settings -> API, copy the Project URL and anon/public key.
+       3. Paste them below. NEVER put a service_role key in this file.
+       ============================================================= */
+    const SUPABASE_URL = "sb_publishable_tMdH5PDzQr2z-bXid_eh3Q_fACagv4e";
+    const SUPABASE_ANON_KEY = "https://jskfvlizdgcbopmmlfwp.supabase.co/rest/v1/";
+    const supabaseReady = SUPABASE_URL.startsWith("https://") && !SUPABASE_URL.includes("PASTE_") && !SUPABASE_ANON_KEY.includes("PASTE_");
+    const db = supabaseReady ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+    document.title = BUSINESS_NAME;
+    document.querySelector(".logo").textContent = BUSINESS_NAME;
+    document.getElementById("year").textContent = new Date().getFullYear();
+    document.getElementById("instagram-link").href = INSTAGRAM_URL;
+    document.getElementById("modal-order").href = INSTAGRAM_URL;
+
+    const productList = document.getElementById("product-list");
+    const wishlistContent = document.getElementById("wishlist-content");
+    const accountModal = document.getElementById("account-modal");
+    const productModal = document.getElementById("product-modal");
+    let currentUser = null;
+    let savedIds = new Set();
+    let selectedProduct = null;
+
+    function money(product) {
+      const current = product.salePrice ?? product.price;
+      return `${Number(current).toFixed(2).replace(/\.00$/, "")} RON`;
+    }
+    function isOnSale(product) { return product.salePrice !== null && Number(product.salePrice) < Number(product.price); }
+    function makeProductCard(product, isSaved = false) {
+      const card = document.createElement("article"); card.className = "product-card";
+      const image = document.createElement("img"); image.className = "product-image"; image.src = product.image; image.alt = product.alt || product.name;
+      image.onerror = () => { image.style.display = "none"; };
+      const heart = document.createElement("button"); heart.className = "heart"; heart.type = "button"; heart.textContent = isSaved ? "♥" : "♡"; heart.setAttribute("aria-label", isSaved ? "Remove from wishlist" : "Add to wishlist");
+      heart.addEventListener("click", async (event) => { event.stopPropagation(); await toggleWishlist(product); });
+      const info = document.createElement("div"); info.className = "product-info";
+      const title = document.createElement("h3"); title.textContent = product.name;
+      const desc = document.createElement("p"); desc.textContent = product.description;
+      const price = document.createElement("span"); price.className = "price";
+      if (isOnSale(product)) { const old = document.createElement("span"); old.className = "old-price"; old.textContent = `${product.price} RON`; price.append(old); }
+      price.append(document.createTextNode(money(product)));
+      info.append(title, desc, price);
+      if (isOnSale(product)) { const tag = document.createElement("span"); tag.className = "sale-tag"; tag.textContent = "On sale"; info.append(tag); }
+      card.append(image, heart, info); card.addEventListener("click", () => openProduct(product)); return card;
+    }
+    function renderProducts() {
+      productList.replaceChildren();
+      PRODUCTS.forEach(p => productList.append(makeProductCard(p, savedIds.has(p.id))));
+      document.getElementById("wishlist-count").textContent = `(${savedIds.size})`;
+    }
+    function openProduct(product) {
+      selectedProduct = product;
+      document.getElementById("modal-image").src = product.image;
+      document.getElementById("modal-image").alt = product.alt || product.name;
+      document.getElementById("modal-name").textContent = product.name;
+      const price = document.getElementById("modal-price"); price.replaceChildren();
+      if (isOnSale(product)) { const old = document.createElement("span"); old.className = "old-price"; old.textContent = `${product.price} RON`; price.append(old); }
+      price.append(document.createTextNode(money(product)));
+      document.getElementById("modal-description").textContent = product.description;
+      document.getElementById("modal-details").textContent = product.details || "";
+      document.getElementById("modal-wishlist").textContent = savedIds.has(product.id) ? "♥ Remove from wishlist" : "♡ Save to wishlist";
+      productModal.classList.add("active");
+    }
+    function showAccount() { accountModal.classList.add("active"); }
+    function status(message, isError = false) { const el = document.getElementById("auth-status"); el.textContent = message; el.style.color = isError ? "#a33" : "var(--muted)"; }
+    function setSignedInUI() {
+      document.getElementById("logout-button").hidden = !currentUser;
+      document.getElementById("signup-button").hidden = !!currentUser;
+      document.getElementById("login-button").hidden = !!currentUser;
+      document.getElementById("account-intro").textContent = currentUser ? `Signed in as ${currentUser.email}` : "Create an account or log in to keep your wishlist.";
+      document.getElementById("account-toggle").textContent = currentUser ? "My account" : "Account / Login";
+    }
+    async function loadWishlist() {
+      if (!db || !currentUser) { savedIds = new Set(); wishlistContent.innerHTML = '<p class="empty">Log in to see and save your wishlist.</p>'; renderProducts(); return; }
+      const { data, error } = await db.from("wishlist").select("product_id").eq("user_id", currentUser.id);
+      if (error) { wishlistContent.textContent = "Could not load your wishlist. Please try again."; console.error(error); return; }
+      savedIds = new Set((data || []).map(row => row.product_id));
+      const savedProducts = PRODUCTS.filter(p => savedIds.has(p.id));
+      wishlistContent.replaceChildren();
+      if (!savedProducts.length) { const empty = document.createElement("p"); empty.className = "empty"; empty.textContent = "Your wishlist is empty. Tap a heart on a product to save it."; wishlistContent.append(empty); }
+      else { const grid = document.createElement("div"); grid.className = "wishlist-grid"; savedProducts.forEach(p => grid.append(makeProductCard(p, true))); wishlistContent.append(grid); }
+      renderProducts();
+      document.getElementById("wishlist-count").textContent = `(${savedIds.size})`;
+    }
+    async function toggleWishlist(product) {
+      if (!db) { status("Wishlist setup is not finished yet. Add your Supabase URL and anon key first.", true); showAccount(); return; }
+      if (!currentUser) { status("Please create an account or log in to save products."); showAccount(); return; }
+      if (savedIds.has(product.id)) {
+        const { error } = await db.from("wishlist").delete().eq("user_id", currentUser.id).eq("product_id", product.id);
+        if (error) { status(error.message, true); return; }
+        savedIds.delete(product.id);
+      } else {
+        const { error } = await db.from("wishlist").insert({ user_id: currentUser.id, product_id: product.id });
+        if (error) { status(error.message, true); return; }
+        savedIds.add(product.id);
+      }
+      await loadWishlist();
+      if (selectedProduct?.id === product.id) document.getElementById("modal-wishlist").textContent = savedIds.has(product.id) ? "♥ Remove from wishlist" : "♡ Save to wishlist";
+    }
+    document.getElementById("modal-wishlist").addEventListener("click", () => selectedProduct && toggleWishlist(selectedProduct));
+    document.getElementById("account-toggle").addEventListener("click", showAccount);
+    document.getElementById("close-account").addEventListener("click", () => accountModal.classList.remove("active"));
+    document.getElementById("close-product").addEventListener("click", () => productModal.classList.remove("active"));
+    [accountModal, productModal].forEach(modal => modal.addEventListener("click", e => { if (e.target === modal) modal.classList.remove("active"); }));
+    document.addEventListener("keydown", e => { if (e.key === "Escape") { accountModal.classList.remove("active"); productModal.classList.remove("active"); } });
+
+    async function signUp() {
+      if (!db) return status("First connect the website to Supabase. Follow SETUP-GUIDE.txt.", true);
+      const email = document.getElementById("email").value.trim(); const password = document.getElementById("password").value;
+      if (!email || password.length < 6) return status("Enter a valid email and a password with at least 6 characters.", true);
+      const { error } = await db.auth.signUp({ email, password });
+      if (error) return status(error.message, true);
+      status("Account created. Check your email for a confirmation link, then log in.");
+    }
+    async function logIn() {
+      if (!db) return status("First connect the website to Supabase. Follow SETUP-GUIDE.txt.", true);
+      const email = document.getElementById("email").value.trim(); const password = document.getElementById("password").value;
+      const { error } = await db.auth.signInWithPassword({ email, password });
+      if (error) return status(error.message, true);
+      status("You're logged in."); accountModal.classList.remove("active");
+    }
+    document.getElementById("signup-button").addEventListener("click", signUp);
+    document.getElementById("login-button").addEventListener("click", logIn);
+    document.getElementById("logout-button").addEventListener("click", async () => { await db.auth.signOut(); status("You have logged out."); });
+
+    renderProducts(); setSignedInUI();
+    if (!supabaseReady) { status("Wishlist is in preview mode. Follow SETUP-GUIDE.txt to connect customer accounts and saved wishlists."); }
+    else {
+      const { data } = await db.auth.getSession(); currentUser = data.session?.user || null; setSignedInUI(); await loadWishlist();
+      db.auth.onAuthStateChange(async (_event, session) => { currentUser = session?.user || null; setSignedInUI(); await loadWishlist(); });
+    }
+  </script>
+</body>
+</html>
